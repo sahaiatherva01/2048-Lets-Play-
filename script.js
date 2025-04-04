@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const board = document.getElementById("game-board");
     const scoreElement = document.getElementById("score");
     const restartButton = document.getElementById("restart-button");
+
     let grid = Array(4).fill().map(() => Array(4).fill(0));
     let score = 0;
 
@@ -28,14 +29,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (emptyTiles.length > 0) {
             let [x, y] = emptyTiles[Math.floor(Math.random() * emptyTiles.length)];
-            grid[x][y] = Math.random() < 1.0 ? 2 : 4;
+            grid[x][y] = Math.random() < 0.9 ? 2 : 4;
             createBoard();
         }
     }
 
     function move(direction) {
-        let moved = false;
         let oldGrid = JSON.stringify(grid);
+        let moved = false;
 
         if (direction === "left" || direction === "right") {
             for (let i = 0; i < 4; i++) {
@@ -76,18 +77,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function handleKeyPress(event) {
         switch (event.key) {
-            case "ArrowLeft":
-                move("left");
-                break;
-            case "ArrowRight":
-                move("right");
-                break;
-            case "ArrowUp":
-                move("up");
-                break;
-            case "ArrowDown":
-                move("down");
-                break;
+            case "ArrowLeft": move("left"); break;
+            case "ArrowRight": move("right"); break;
+            case "ArrowUp": move("up"); break;
+            case "ArrowDown": move("down"); break;
         }
         scoreElement.textContent = score;
     }
@@ -99,6 +92,34 @@ document.addEventListener("DOMContentLoaded", () => {
         addRandomTile();
         addRandomTile();
     }
+
+    // Swipe Controls for Mobile
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchEndX = 0;
+    let touchEndY = 0;
+
+    document.addEventListener("touchstart", (e) => {
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+    });
+
+    document.addEventListener("touchend", (e) => {
+        touchEndX = e.changedTouches[0].clientX;
+        touchEndY = e.changedTouches[0].clientY;
+
+        let dx = touchEndX - touchStartX;
+        let dy = touchEndY - touchStartY;
+
+        if (Math.abs(dx) > Math.abs(dy)) {
+            if (dx > 30) move("right");
+            else if (dx < -30) move("left");
+        } else {
+            if (dy > 30) move("down");
+            else if (dy < -30) move("up");
+        }
+        scoreElement.textContent = score;
+    });
 
     document.addEventListener("keydown", handleKeyPress);
     restartButton.addEventListener("click", restartGame);
